@@ -32,16 +32,6 @@ To run Auction Alley locally, follow these steps:
 3. Log in to your account.
 4. Explore listed products, bid on active auctions, or list your own products for auction.
 
-## Contributing
-
-Contributions are welcome! If you'd like to contribute to Auction Alley, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/my-feature`
-3. Make your changes and commit them: `git commit -am 'Add new feature'`
-4. Push to the branch: `git push origin feature/my-feature`
-5. Submit a pull request.
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
