@@ -31,7 +31,3 @@ To run Auction Alley locally, follow these steps:
 2. Register for an account as a seller or buyer.
 3. Log in to your account.
 4. Explore listed products, bid on active auctions, or list your own products for auction.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
