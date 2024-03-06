@@ -10,6 +10,32 @@
 <style>
 body {font-family: "Lato", sans-serif}
 .mySlides {display: none}
+.carousel {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.carousel-item {
+  flex: 0 0 33.33%; /* Adjust this to adjust the number of visible items */
+  padding: 0 10px; /* Adjust this for spacing between items */
+}
+
+/* Style the buttons for scrolling */
+.w3-display-left, .w3-display-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  cursor: pointer;
+}
+
+.w3-display-left {
+  left: -45px;
+}
+
+.w3-display-right {
+  right: -45px;
+}
 </style>
 </head>
 <body>
@@ -19,9 +45,9 @@ body {font-family: "Lato", sans-serif}
   <div class="w3-bar w3-black w3-card">
     <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
     <a href="#" class="w3-bar-item w3-button w3-padding-large">HOME</a>
-    <a href="#band" class="w3-bar-item w3-button w3-padding-large w3-hide-small">BAND</a>
-    <a href="#tour" class="w3-bar-item w3-button w3-padding-large w3-hide-small">TOUR</a>
-    <a href="#contact" class="w3-bar-item w3-button w3-padding-large w3-hide-small">CONTACT</a>
+    <a href="#band" class="w3-bar-item w3-button w3-padding-large w3-hide-small">ABOUT US</a>
+    <a href="#tour" class="w3-bar-item w3-button w3-padding-large w3-hide-small">AUCTIONS</a>
+    <a href="#contact" class="w3-bar-item w3-button w3-padding-large w3-hide-small">CONTACT US</a>
     <div class="w3-dropdown-hover w3-hide-small">
       <button class="w3-padding-large w3-button" title="More">MORE <i class="fa fa-caret-down"></i></button>     
       <div class="w3-dropdown-content w3-bar-block w3-card-4">
@@ -47,94 +73,40 @@ body {font-family: "Lato", sans-serif}
 
   <!-- Automatic Slideshow Images -->
   <div class="mySlides w3-display-container w3-center">
-    <img src="/w3images/la.jpg" style="width:100%">
-    <div class="w3-display-bottommiddle w3-container w3-text-white w3-padding-32 w3-hide-small">
-      <h3>Los Angeles</h3>
-      <p><b>We had the best time playing at Venice Beach!</b></p>   
-    </div>
-  </div>
-  <div class="mySlides w3-display-container w3-center">
-    <img src="/w3images/ny.jpg" style="width:100%">
-    <div class="w3-display-bottommiddle w3-container w3-text-white w3-padding-32 w3-hide-small">
-      <h3>New York</h3>
-      <p><b>The atmosphere in New York is lorem ipsum.</b></p>    
-    </div>
-  </div>
-  <div class="mySlides w3-display-container w3-center">
-    <img src="/w3images/chicago.jpg" style="width:100%">
-    <div class="w3-display-bottommiddle w3-container w3-text-white w3-padding-32 w3-hide-small">
-      <h3>Chicago</h3>
-      <p><b>Thank you, Chicago - A night we won't forget.</b></p>    
-    </div>
-  </div>
-
+    <img src="./static/img1.jpg" style="width:100%">
   <!-- The Band Section -->
   <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="band">
-    <h2 class="w3-wide">THE BAND</h2>
-    <p class="w3-opacity"><i>We love music</i></p>
-    <p class="w3-justify">We have created a fictional band website. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-      ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur
-      adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <div class="w3-row w3-padding-32">
-      <div class="w3-third">
-        <p>Name</p>
-        <img src="/w3images/bandmember.jpg" class="w3-round w3-margin-bottom" alt="Random Name" style="width:60%">
-      </div>
-      <div class="w3-third">
-        <p>Name</p>
-        <img src="/w3images/bandmember.jpg" class="w3-round w3-margin-bottom" alt="Random Name" style="width:60%">
-      </div>
-      <div class="w3-third">
-        <p>Name</p>
-        <img src="/w3images/bandmember.jpg" class="w3-round" alt="Random Name" style="width:60%">
-      </div>
-    </div>
+    <h2 class="w3-wide">About Us</h2>
+    <p class="w3-opacity"><i>Bid, win, discover: It's all at Auction Alley.</i></p>
+    <p class="w3-justify">Auction Alley is your online marketplace for thrilling discoveries! We connect passionate buyers and sellers through exciting auctions, offering a diverse range of treasures,
+      Bid competitively, find hidden gems, and experience the convenience of buying and selling from anywhere, anytime. Join our vibrant community and ignite your auction passion at Auction Alley.</p>
   </div>
 
   <!-- The Tour Section -->
   <div class="w3-black" id="tour">
-    <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
-      <h2 class="w3-wide w3-center">TOUR DATES</h2>
-      <p class="w3-opacity w3-center"><i>Remember to book your tickets!</i></p><br>
-
-      <ul class="w3-ul w3-border w3-white w3-text-grey">
-        <li class="w3-padding">September <span class="w3-tag w3-red w3-margin-left">Sold out</span></li>
-        <li class="w3-padding">October <span class="w3-tag w3-red w3-margin-left">Sold out</span></li>
-        <li class="w3-padding">November <span class="w3-badge w3-right w3-margin-right">3</span></li>
-      </ul>
-
-      <div class="w3-row-padding w3-padding-32" style="margin:0 -16px">
-        <div class="w3-third w3-margin-bottom">
-          <img src="/w3images/newyork.jpg" alt="New York" style="width:100%" class="w3-hover-opacity">
-          <div class="w3-container w3-white">
-            <p><b>New York</b></p>
-            <p class="w3-opacity">Fri 27 Nov 2016</p>
-            <p>Praesent tincidunt sed tellus ut rutrum sed vitae justo.</p>
-            <button class="w3-button w3-black w3-margin-bottom" onclick="document.getElementById('ticketModal').style.display='block'">Buy Tickets</button>
+    <div class="w3-container w3-content w3-padding-64" style="max-width:800px; position: relative;">
+      <h2 class="w3-wide w3-center">UPCOMING AUCTIONS</h2>
+      <p class="w3-opacity w3-center"><i>Bid on the future: See what's coming soon to Auction Alley.</i></p><br>
+      <div class="w3-row-padding w3-padding-32" style="margin:0 -16px; overflow: hidden;">
+        <button class="w3-button w3-black w3-display-left" onclick="prev()">&#10094;</button>
+        <div id="carousel" class="carousel">
+        {% for product in products %}
+          <div class="carousel-item">
+            <img src="./static/img2.jpg" alt="New York" style="width:100%" class="w3-hover-opacity">
+            <div class="w3-container w3-white">
+              <p><b>{{ product.name }}</b></p>
+              <p class="w3-opacity">Scheduled Time: {{ product.scheduled_time }}</p>
+              <div id="timer{{ loop.index }}"></div>
+              <p>Starting Bid: ${{ product.starting_bid }}</p>
+              <button class="w3-button w3-black w3-margin-bottom" onclick="document.getElementById('ticketModal').style.display='block'">Start Bidding</button>
+            </div>
           </div>
+        {% endfor %}
         </div>
-        <div class="w3-third w3-margin-bottom">
-          <img src="/w3images/paris.jpg" alt="Paris" style="width:100%" class="w3-hover-opacity">
-          <div class="w3-container w3-white">
-            <p><b>Paris</b></p>
-            <p class="w3-opacity">Sat 28 Nov 2016</p>
-            <p>Praesent tincidunt sed tellus ut rutrum sed vitae justo.</p>
-            <button class="w3-button w3-black w3-margin-bottom" onclick="document.getElementById('ticketModal').style.display='block'">Buy Tickets</button>
-          </div>
-        </div>
-        <div class="w3-third w3-margin-bottom">
-          <img src="/w3images/sanfran.jpg" alt="San Francisco" style="width:100%" class="w3-hover-opacity">
-          <div class="w3-container w3-white">
-            <p><b>San Francisco</b></p>
-            <p class="w3-opacity">Sun 29 Nov 2016</p>
-            <p>Praesent tincidunt sed tellus ut rutrum sed vitae justo.</p>
-            <button class="w3-button w3-black w3-margin-bottom" onclick="document.getElementById('ticketModal').style.display='block'">Buy Tickets</button>
-          </div>
-        </div>
+        <button class="w3-button w3-black w3-display-right" onclick="next()">&#10095;</button>
       </div>
     </div>
   </div>
-
   <!-- Ticket Modal -->
   <div id="ticketModal" class="w3-modal">
     <div class="w3-modal-content w3-animate-top w3-card-4">
@@ -157,13 +129,13 @@ body {font-family: "Lato", sans-serif}
 
   <!-- The Contact Section -->
   <div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="contact">
-    <h2 class="w3-wide w3-center">CONTACT</h2>
-    <p class="w3-opacity w3-center"><i>Fan? Drop a note!</i></p>
+    <h2 class="w3-wide w3-center">CONTACT US</h2>
+    <p class="w3-opacity w3-center"><i>Need help? We're here for you.</i></p>
     <div class="w3-row w3-padding-32">
       <div class="w3-col m6 w3-large w3-margin-bottom">
-        <i class="fa fa-map-marker" style="width:30px"></i> Chicago, US<br>
-        <i class="fa fa-phone" style="width:30px"></i> Phone: +00 151515<br>
-        <i class="fa fa-envelope" style="width:30px"> </i> Email: mail@mail.com<br>
+        <i class="fa fa-map-marker" style="width:30px"></i> Manipal, India<br>
+        <i class="fa fa-phone" style="width:30px"></i> Phone: +91 XXXXXXXX78<br>
+        <i class="fa fa-envelope" style="width:30px"> </i> Email: email@gmail.com<br>
       </div>
       <div class="w3-col m6">
         <form action="/action_page.php" target="_blank">
@@ -184,9 +156,6 @@ body {font-family: "Lato", sans-serif}
   
 <!-- End Page Content -->
 </div>
-
-<!-- Image of location/map -->
-<img src="/w3images/map.jpg" class="w3-image w3-greyscale-min" style="width:100%">
 
 <!-- Footer -->
 <footer class="w3-container w3-padding-64 w3-center w3-opacity w3-light-grey w3-xlarge">
@@ -232,6 +201,59 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+{% for product in products %}
+            var countDownDate{{ loop.index }} = new Date("{{ product.scheduled_time }}").getTime();
+
+            var x{{ loop.index }} = setInterval(function() {
+                var now = new Date().getTime();
+                var distance = countDownDate{{ loop.index }} - now;
+
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById("timer{{ loop.index }}").innerHTML = days + "d " + hours + "h "
+                + minutes + "m " + seconds + "s ";
+
+                if (distance < 0) {
+                    clearInterval(x{{ loop.index }});
+                    document.getElementById("timer{{ loop.index }}").innerHTML = "EXPIRED";
+                }
+            }, 1000);
+        {% endfor %}
+  // Function to initialize carousel
+function initCarousel() {
+  const carousel = document.getElementById('carousel');
+  const items = document.querySelectorAll('.carousel-item');
+  const numItems = items.length;
+  const visibleItems = 3; // Number of items visible at a time
+  let currentIndex = 0;
+
+  // Function to update the carousel display
+  function moveCarouselTo(index) {
+    if (index < 0 || index >= numItems - visibleItems + 1) return;
+    carousel.style.transform = `translateX(-${index * (100 / visibleItems)}%)`;
+    currentIndex = index;
+  }
+
+  // Function to move carousel to the next set of items
+  function next() {
+    moveCarouselTo(currentIndex + 1);
+  }
+
+  // Function to move carousel to the previous set of items
+  function prev() {
+    moveCarouselTo(currentIndex - 1);
+  }
+
+  // Add event listeners for next and previous buttons
+  document.querySelector('.w3-display-left').addEventListener('click', prev);
+  document.querySelector('.w3-display-right').addEventListener('click', next);
+}
+
+// Call the initCarousel function to initialize the carousel
+initCarousel();
 </script>
 
 </body>

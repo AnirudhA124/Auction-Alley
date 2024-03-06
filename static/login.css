@@ -1,41 +1,58 @@
-/* styles.css */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex; 
+    overflow: hidden; 
+    font-family: 'Garamond', serif; 
 }
 
-.container {
-    width: 300px;
-    margin: 100px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.login-background {
+    width: 70%; 
+    height: 100%; 
+    background-image: url('https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: auto 100%; 
+    background-position: left; 
+    background-repeat: no-repeat; 
 }
 
-form {
-    margin-bottom: 20px;
+.login-form {
+    width: 30%; 
+    padding: 20px; 
+    background-color: rgb(26, 124, 177);
+    text-align: center; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    color: white; 
+    border: 2px solid white; 
+    border-radius: 10px; 
 }
 
-input[type="text"],
-input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 80%; /* Set input width */
+    margin-bottom: 10px; /* Add space between inputs */
+    padding: 10px; /* Add padding */
+    font-size: 16px; /* Increase font size */
+    border-radius: 5px; /* Add curved borders */
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
+.login-form button {
+    width: 70%; 
+    padding: 25px; 
+    font-size: 25px; 
+    border-radius: 20px;
+    border: none; 
+    background-color: white; 
+    color: rgb(26, 124, 177); 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
 }
 
-button:hover {
-    background-color: #0056b3;
+.login-form button:hover {
+    background-color: rgb(200, 200, 200); 
+    color: rgb(194, 172, 172); 
 }
