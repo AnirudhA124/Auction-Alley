@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Product for Auction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://img.freepik.com/free-photo/cylinder-empty-black-podium-pedestal-product-display-stand-background-3d-rendering_56104-1366.jpg?size=626&ext=jpg&ga=GA1.1.1700460183.1712188800&semt=ais'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"],
+        textarea,
+        input[type="number"],
+        input[type="datetime-local"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #555;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>List Product for Auction</h2>
+        <form action="/items" method="post">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+            <label for="starting_bid">Starting Bid:</label>
+            <input type="number" id="starting_bid" name="starting_bid" min="0" required>
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
+                <option value="Art and Collectibles">Art & Collectibles</option>
+                <option value="Jewelry and Watches">Jewelry & Watches</option>
+                <option value="Fashion and Accessories">Fashion & Accessories</option>
+                <option value="Home and Garden">Home & Garden</option>
+                <option value="Electronics and Gadgets">Electronics & Gadgets</option>
+                <option value="Vehicles and Automotive">Vehicles & Automotive</option>
+                <option value="Sports and Recreation">Sports & Recreation</option>
+            </select>
+            <label for="start_time">Start Time:</label>
+            <input type="datetime-local" id="start_time" name="start_time" required>
+            <label for="end_time">End Time:</label>
+            <input type="datetime-local" id="end_time" name="end_time" required>
+            <input type="submit" value="List Product">
+        </form>
+    </div>
+</body>
+</html>
