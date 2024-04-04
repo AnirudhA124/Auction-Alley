@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from datetime import datetime
 import cx_Oracle
 import pickle
 import os
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 
 # Dummy user data for demonstration
 users = {'admin': 'admin'}
@@ -51,9 +52,14 @@ def check_seller_credentials(email, password):
 def login():
     username = request.form['username']
     password = request.form['password']
-    if check_buyer_credentials(username,password) or check_seller_credentials(username,password):
+    if check_seller_credentials(username,password):
         # Redirect to the dashboard or home page upon successful login
-        return redirect(url_for('dashboard'))
+        cursor.execute("SELECT seller_id FROM seller WHERE email = :email", {'email': username})
+        seller_id = cursor.fetchone()[0]
+        session['seller_id'] = seller_id
+        return render_template('main_seller.html', products=upcoming_products)
+    elif check_buyer_credentials(username,password):
+        return render_template('main_buyer.html', products=upcoming_products)
     else:
         # You might want to show an error message here
         print("Password/username incorrect!!")
@@ -92,58 +98,156 @@ def generate_buyer_id():
     counter += 1
     with open("buyer.pkl", "wb") as f:
         pickle.dump(counter, f)
-    seller_id = f"buy{unique_id:07d}"
-    return seller_id
+    buyer_id = f"buy{unique_id:07d}"
+    return buyer_id
 
-@app.route('/signup', methods=['POST'])
+def generate_category_id():
+    if os.path.exists("category.pkl"):
+        with open("category.pkl", "rb") as f:
+            try:
+                counter = pickle.load(f)
+            except EOFError:
+                counter = 1
+    else:
+        counter = 1
+    unique_id = counter
+    counter += 1
+    with open("category.pkl", "wb") as f:
+        pickle.dump(counter, f)
+    category_id = f"cat{unique_id:07d}"
+    return category_id
+
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    try:
-        # Fetch data from the form
-        seller_id = generate_seller_id()
-        buyer_id=generate_buyer_id()
-        email = request.form['email']
-        password = request.form['password']
-        fname = request.form['fname']
-        lname = request.form['lname']
-        address = request.form['address']
-        pincode = int(request.form['pincode'])
-        phone_no = int(request.form['phone_no'])
-        buyer = 'buyer' in request.form
-        seller = 'seller' in request.form
-        print("Seller:",seller)
-        print("Buyer:",buyer)
-        
-        # Execute SQL query to insert seller information
-        if seller:
-            cursor.execute("""
-INSERT INTO seller (seller_id, email, password, fname, lname, address, pincode, phone_no) 
-VALUES (:seller_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
-""", (seller_id, email, password, fname, lname, address, pincode, phone_no))
-        
-        # Commit the transaction
-            connection.commit()
-        elif buyer:
-            cursor.execute("""
-INSERT INTO buyer (buyer_id, email, password, fname, lname, address, pincode, phone_no) 
-VALUES (:buyer_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
-""", (buyer_id, email, password, fname, lname, address, pincode, phone_no))
-        
-        # Commit the transaction
-            connection.commit()
-        else:
-            print("fuck")
-        
-        # Redirect to the dashboard or home page upon successful signup
-        return redirect(url_for('dashboard'))
-    except cx_Oracle.DatabaseError as e:
-        # Handle any database errors
-        print("Database error:", e)
-        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        try:
+            # Fetch data from the form
+            email = request.form['email']
+            password = request.form['password']
+            fname = request.form['fname']
+            lname = request.form['lname']
+            address = request.form['address']
+            pincode = int(request.form['pincode'])
+            phone_no = int(request.form['phone_no'])
+            buyer = 'buyer' in request.form
+            seller = 'seller' in request.form
+
+            # Check if email already exists in seller or buyer table
+            cursor.execute("SELECT COUNT(*) FROM seller WHERE email = :email", {'email': email})
+            seller_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM buyer WHERE email = :email", {'email': email})
+            buyer_count = cursor.fetchone()[0]
+
+            if seller_count > 0 and seller:
+                # Email already exists in seller table
+                flash('Email is already registered as a seller.', 'error')
+                return redirect(url_for('signup'))
+
+            if buyer_count > 0 and buyer:
+                # Email already exists in buyer table
+                flash('Email is already registered as a buyer.', 'error')
+                return redirect(url_for('signup'))
+
+            # Execute SQL query to insert seller or buyer information
+            if seller:
+                seller_id = generate_seller_id()
+                cursor.execute("""
+                    INSERT INTO seller (seller_id, email, password, fname, lname, address, pincode, phone_no) 
+                    VALUES (:seller_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
+                """, (seller_id, email, password, fname, lname, address, pincode, phone_no))
+                connection.commit()
+                return render_template('main_seller.html', products=upcoming_products)
+
+            elif buyer:
+                buyer_id = generate_buyer_id()
+                cursor.execute("""
+                    INSERT INTO buyer (buyer_id, email, password, fname, lname, address, pincode, phone_no) 
+                    VALUES (:buyer_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
+                """, (buyer_id, email, password, fname, lname, address, pincode, phone_no))
+                connection.commit()
+                return render_template('main_buyer.html', products=upcoming_products)
+
+            # Redirect to the dashboard or home page upon successful signup
+            return redirect(url_for('dashboard'))
+
+        except Exception as e:
+            # Handle any exceptions
+            print("Error:", e)
+            flash('An error occurred while processing your request.', 'error')
+            return redirect(url_for('dashboard'))
+    else:
+        # Handle GET request (e.g., render the sign-up form)
+        return render_template('signup.html')
 
 @app.route('/dashboard')
 def dashboard():
     # Render dashboard template with upcoming auctions
     return render_template('main.html', products=upcoming_products)
 
+@app.route('/item_display')
+def item_display():
+    return render_template('item.html')
+
+def generate_item_number():
+    if os.path.exists("item.pkl"):
+        with open("item.pkl", "rb") as f:
+            try:
+                counter = pickle.load(f)
+            except EOFError:
+                counter = 1
+    else:
+        counter = 1
+    unique_id = counter
+    counter += 1
+    with open("item.pkl", "wb") as f:
+        pickle.dump(counter, f)
+    item_number = f"ite{unique_id:07d}"
+    return item_number
+
+
+@app.route('/items', methods=['POST'])
+def items():
+    if request.method=='POST':
+        try:
+            if 'seller_id' in session:
+                seller_id = session['seller_id']
+            else:
+                print("No seller!")
+            item_number=generate_item_number()
+            category_id=generate_category_id()
+            title=request.form["title"]
+            description=request.form["description"]
+            starting_bid=int(request.form["starting_bid"])
+            start_time=request.form["start_time"]
+            end_time=request.form["end_time"]
+            category = request.form['category'].replace('&amp;', 'and')
+            print(seller_id)
+            print(item_number)
+            print(title)
+            print(description)
+            print(starting_bid)
+            print(start_time)
+            print(end_time)
+            print(category)
+            print(category_id)
+            cursor.execute("""
+                    INSERT INTO items (item_number, title, description, starting_bid, seller_id) 
+                    VALUES (:item_number, :title, :description, :starting_bid, :seller_id)
+                """, (item_number,title,description,starting_bid,seller_id))
+            connection.commit()
+            cursor.execute("""
+                    INSERT INTO category (category_id, category_name, item_number) 
+                    VALUES (:category_id, :category_name, :item_number)
+                """, (category_id,category,item_number))
+            connection.commit()
+            print("inserted")
+        except Exception as e:
+            # Handle any exceptions
+            print("Error:", e)
+            flash('An error occurred while processing your request.', 'error')
+            return redirect(url_for('dashboard'))
+    return render_template('main_seller.html')
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)
