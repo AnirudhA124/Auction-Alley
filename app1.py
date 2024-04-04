@@ -18,8 +18,14 @@ products = [
     {"name": "Product 4", "description": "Description of product 4", "starting_bid": 75, "scheduled_time": "2024-04-06T22:00:00"},
 ]
 
+item = {
+        'title': 'Telephone',
+        'photo': './static/img2.jpg',
+        'description': 'This is a description of the example item.'
+    }
+
 # Filter out expired auctions
-current_time = datetime.now()
+current_time =datetime.now()
 upcoming_products = [product for product in products if datetime.fromisoformat(product["scheduled_time"]) > current_time]
 
 # Database connection
@@ -59,6 +65,9 @@ def login():
         session['seller_id'] = seller_id
         return render_template('main_seller.html', products=upcoming_products)
     elif check_buyer_credentials(username,password):
+        cursor.execute("SELECT buyer_id FROM buyer WHERE email = :email", {'email': username})
+        buyer_id = cursor.fetchone()[0]
+        session['buyer_id'] = buyer_id
         return render_template('main_buyer.html', products=upcoming_products)
     else:
         # You might want to show an error message here
@@ -116,6 +125,22 @@ def generate_category_id():
         pickle.dump(counter, f)
     category_id = f"cat{unique_id:07d}"
     return category_id
+
+def generate_bid_id():
+    if os.path.exists("bid.pkl"):
+        with open("bid.pkl", "rb") as f:
+            try:
+                counter = pickle.load(f)
+            except EOFError:
+                counter = 1
+    else:
+        counter = 1
+    unique_id = counter
+    counter += 1
+    with open("bid.pkl", "wb") as f:
+        pickle.dump(counter, f)
+    bid_id = f"bid{unique_id:07d}"
+    return bid_id
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -205,6 +230,34 @@ def generate_item_number():
     item_number = f"ite{unique_id:07d}"
     return item_number
 
+def generate_auction_id():
+    if os.path.exists("auction.pkl"):
+        with open("auction.pkl", "rb") as f:
+            try:
+                counter = pickle.load(f)
+            except EOFError:
+                counter = 1
+    else:
+        counter = 1
+    unique_id = counter
+    counter += 1
+    with open("auction.pkl", "wb") as f:
+        pickle.dump(counter, f)
+    auction_id = f"auc{unique_id:07d}"
+    return auction_id
+
+@app.route('/bid_display')
+def bid_display():
+    item = {
+        'title': 'Telephone',
+        'photo': './static/img2.jpg',
+        'description': 'This is a description of the example item.'
+    }
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM bid ORDER BY bid_timestamp DESC")
+    bids = [{'bidder_id': row[1], 'bid_amount': row[2], 'bid_time': row[3]} for row in cursor.fetchall()]
+    cursor.close()
+    return render_template('bid.html', item=item, bids=bids)
 
 @app.route('/items', methods=['POST'])
 def items():
@@ -214,6 +267,7 @@ def items():
                 seller_id = session['seller_id']
             else:
                 print("No seller!")
+            auction_id=generate_auction_id()
             item_number=generate_item_number()
             category_id=generate_category_id()
             title=request.form["title"]
@@ -222,6 +276,9 @@ def items():
             start_time=request.form["start_time"]
             end_time=request.form["end_time"]
             category = request.form['category'].replace('&amp;', 'and')
+            start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+            end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+            print(auction_id)
             print(seller_id)
             print(item_number)
             print(title)
@@ -241,13 +298,42 @@ def items():
                     VALUES (:category_id, :category_name, :item_number)
                 """, (category_id,category,item_number))
             connection.commit()
+            cursor.execute("""
+                    INSERT INTO auction (auction_id, item_number, start_time, end_time,min_bid_amt, seller_id) 
+                    VALUES (:auction_id, :item_number, :start_time, :end_time, :min_bid_amt, :seller_id)
+                """, (auction_id,item_number,start_time,end_time,starting_bid,seller_id))
+            connection.commit()
             print("inserted")
         except Exception as e:
             # Handle any exceptions
             print("Error:", e)
             flash('An error occurred while processing your request.', 'error')
-            return redirect(url_for('dashboard'))
+            return render_template('main_seller.html')
     return render_template('main_seller.html')
+
+@app.route('/bid',methods=['POST'])
+def bid():
+    if request.method=='POST':
+        try:
+            if 'buyer_id' in session:
+                buyer_id = session['buyer_id']
+            else:
+                print("No buyer!")
+            bid_id=generate_bid_id()
+            bid_amount = request.form['bid_amount']
+            current_time = datetime.now()
+            print(bid_id)
+            print(bid_amount)
+            print(current_time)
+            print(buyer_id)
+            # Process bid amount here
+            return render_template('bid.html', item=item)
+        except Exception as e:
+            # Handle any exceptions
+            print("Error:", e)
+            flash('An error occurred while processing your request.', 'error')
+            return render_template('main_buyer.html')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',debug=True)
