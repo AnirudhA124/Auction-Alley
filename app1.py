@@ -12,11 +12,12 @@ users = {'admin': 'admin'}
 
 # Define the products with scheduled time
 products = [
-    {"name": "Product 1", "description": "Description of product 1", "starting_bid": 50, "scheduled_time": "2024-04-07T22:00:00"},
-    {"name": "Product 2", "description": "Description of product 2", "starting_bid": 100, "scheduled_time": "2024-04-07T22:30:00"},
-    {"name": "Product 3", "description": "Description of product 3", "starting_bid": 75, "scheduled_time": "2024-04-06T22:00:00"},
-    {"name": "Product 4", "description": "Description of product 4", "starting_bid": 75, "scheduled_time": "2024-04-06T22:00:00"},
+    {"name": "Product 1", "description": "Description of product 1", "starting_bid": 50, "start_time": "2024-04-05T17:10:00", "end_time": "2024-04-05T17:11:00"},
+    {"name": "Product 2", "description": "Description of product 2", "starting_bid": 100, "start_time": "2024-04-07T22:30:00", "end_time": "2024-04-07T23:30:00"},
+    {"name": "Product 3", "description": "Description of product 3", "starting_bid": 75, "start_time": "2024-04-06T22:00:00", "end_time": "2024-04-06T23:00:00"},
+    {"name": "Product 4", "description": "Description of product 4", "starting_bid": 75, "start_time": "2024-04-06T22:00:00", "end_time": "2024-04-06T23:00:00"},
 ]
+
 
 item = {
         'title': 'Telephone',
@@ -26,7 +27,7 @@ item = {
 
 # Filter out expired auctions
 current_time =datetime.now()
-upcoming_products = [product for product in products if datetime.fromisoformat(product["scheduled_time"]) > current_time]
+upcoming_products = [product for product in products if datetime.fromisoformat(product["end_time"]) > current_time]
 
 # Database connection
 try:
@@ -63,16 +64,106 @@ def login():
         cursor.execute("SELECT seller_id FROM seller WHERE email = :email", {'email': username})
         seller_id = cursor.fetchone()[0]
         session['seller_id'] = seller_id
-        return render_template('main_seller.html', products=upcoming_products)
+        return redirect(url_for('main_seller'))
     elif check_buyer_credentials(username,password):
         cursor.execute("SELECT buyer_id FROM buyer WHERE email = :email", {'email': username})
         buyer_id = cursor.fetchone()[0]
         session['buyer_id'] = buyer_id
-        return render_template('main_buyer.html', products=upcoming_products)
+        return redirect(url_for('main_buyer'))
     else:
         # You might want to show an error message here
         print("Password/username incorrect!!")
         return redirect(url_for('index'))
+
+@app.route('/main_seller')
+def main_seller():
+    try:
+        cursor = connection.cursor()
+
+        # Fetch item information from the items and auction tables
+        if 'seller_id' in session:
+                seller_id = session['seller_id']
+        else:
+            print("No seller!")  # Using session.get to avoid KeyError if seller_id is not set
+        if seller_id:
+            # Execute SQL query to fetch item information
+            cursor.execute("""
+                SELECT i.item_number, i.title, i.description, i.starting_bid, a.start_time, a.end_time
+                FROM items i
+                JOIN auction a ON i.item_number = a.item_number
+                WHERE a.seller_id = :seller_id
+            """, {'seller_id': seller_id})
+
+            items = cursor.fetchall()
+
+            # Close the cursor
+            cursor.close()
+            # Render the main seller template with the fetched items
+            # Filter out expired auctions
+            current_time = datetime.now()
+            upcoming_products = [item for item in items if item[5] > current_time]  # Corrected the indexing for end_time
+            print(upcoming_products)
+            return render_template('main_seller.html', items=upcoming_products)
+        else:
+            # Handle the case when seller_id is not set in the session
+            flash('Seller ID is not set.', 'error')
+            return redirect(url_for('index'))
+    except cx_Oracle.DatabaseError as e:
+        # Handle Oracle database errors
+        print("Database error:", e)
+        flash('An error occurred while fetching data.', 'error')
+        return redirect(url_for('index'))
+    except Exception as e:
+        # Handle other exceptions
+        print("Error:", e)
+        flash('An error occurred.', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/main_buyer')
+def main_buyer():
+    try:
+        cursor = connection.cursor()
+
+        # Fetch item information from the items and auction tables
+        if 'seller_id' in session:
+                seller_id = session['seller_id']
+        else:
+            print("No seller!")  # Using session.get to avoid KeyError if seller_id is not set
+        if seller_id:
+            # Execute SQL query to fetch item information
+            cursor.execute("""
+                SELECT i.item_number, i.title, i.description, i.starting_bid, a.start_time, a.end_time
+                FROM items i
+                JOIN auction a ON i.item_number = a.item_number
+                WHERE a.seller_id = :seller_id
+            """, {'seller_id': seller_id})
+
+            items = cursor.fetchall()
+
+            # Close the cursor
+            cursor.close()
+            # Render the main seller template with the fetched items
+            # Filter out expired auctions
+            current_time = datetime.now()
+            upcoming_products = [item for item in items if item[5] > current_time]  # Corrected the indexing for end_time
+            print(upcoming_products)
+            return render_template('main_buyer.html', items=upcoming_products)
+        else:
+            # Handle the case when seller_id is not set in the session
+            flash('Seller ID is not set.', 'error')
+            return redirect(url_for('index'))
+    except cx_Oracle.DatabaseError as e:
+        # Handle Oracle database errors
+        print("Database error:", e)
+        flash('An error occurred while fetching data.', 'error')
+        return redirect(url_for('index'))
+    except Exception as e:
+        # Handle other exceptions
+        print("Error:", e)
+        flash('An error occurred.', 'error')
+        return redirect(url_for('index'))
+
+
 
 @app.route('/signup_display', methods=['GET'])
 def signup_display():
@@ -164,12 +255,12 @@ def signup():
             cursor.execute("SELECT COUNT(*) FROM buyer WHERE email = :email", {'email': email})
             buyer_count = cursor.fetchone()[0]
 
-            if seller_count > 0 and seller:
+            if seller_count > 0 or buyer_count>0 and seller:
                 # Email already exists in seller table
                 flash('Email is already registered as a seller.', 'error')
                 return redirect(url_for('signup'))
 
-            if buyer_count > 0 and buyer:
+            if buyer_count > 0 or seller_count>0 and buyer:
                 # Email already exists in buyer table
                 flash('Email is already registered as a buyer.', 'error')
                 return redirect(url_for('signup'))
@@ -182,7 +273,7 @@ def signup():
                     VALUES (:seller_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
                 """, (seller_id, email, password, fname, lname, address, pincode, phone_no))
                 connection.commit()
-                return render_template('main_seller.html', products=upcoming_products)
+                return redirect(url_for('main_seller'))
 
             elif buyer:
                 buyer_id = generate_buyer_id()
@@ -191,24 +282,16 @@ def signup():
                     VALUES (:buyer_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
                 """, (buyer_id, email, password, fname, lname, address, pincode, phone_no))
                 connection.commit()
-                return render_template('main_buyer.html', products=upcoming_products)
-
-            # Redirect to the dashboard or home page upon successful signup
-            return redirect(url_for('dashboard'))
+                return redirect(url_for('main_buyer'))
 
         except Exception as e:
             # Handle any exceptions
             print("Error:", e)
             flash('An error occurred while processing your request.', 'error')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
     else:
         # Handle GET request (e.g., render the sign-up form)
         return render_template('signup.html')
-
-@app.route('/dashboard')
-def dashboard():
-    # Render dashboard template with upcoming auctions
-    return render_template('main.html', products=upcoming_products)
 
 @app.route('/item_display')
 def item_display():
@@ -248,14 +331,23 @@ def generate_auction_id():
 
 @app.route('/bid_display')
 def bid_display():
+    item_number = request.args.get('item_number')
+    session['item_number'] = item_number
+    cursor = connection.cursor()
+    
+    # Fetch item details from the database
+    cursor.execute("SELECT title, description FROM items WHERE item_number = :item_number", {'item_number': item_number})
+    item_row = cursor.fetchone()
     item = {
-        'title': 'Telephone',
+        'title': item_row[0],
         'photo': './static/img2.jpg',
-        'description': 'This is a description of the example item.'
+        'description': item_row[1]
     }
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM bid ORDER BY bid_timestamp DESC")
-    bids = [{'bidder_id': row[1], 'bid_amount': row[2], 'bid_time': row[3]} for row in cursor.fetchall()]
+    sql_query = """SELECT * FROM bid WHERE item_number = :item_number ORDER BY bid_timestamp DESC"""
+    cursor.execute(sql_query, {'item_number': item_number})
+    bids = [{'bidder_id': row[0], 'bid_amount': row[1], 'bid_time': row[2]} for row in cursor.fetchall()]
+    print(bids)
     cursor.close()
     return render_template('bid.html', item=item, bids=bids)
 
@@ -308,31 +400,52 @@ def items():
             # Handle any exceptions
             print("Error:", e)
             flash('An error occurred while processing your request.', 'error')
-            return render_template('main_seller.html')
-    return render_template('main_seller.html')
+            return redirect(url_for('main_seller'))
+    return redirect(url_for('main_seller'))
 
-@app.route('/bid',methods=['POST'])
+@app.route('/bid', methods=['POST'])
 def bid():
-    if request.method=='POST':
+    if request.method == 'POST':
         try:
             if 'buyer_id' in session:
                 buyer_id = session['buyer_id']
             else:
                 print("No buyer!")
-            bid_id=generate_bid_id()
-            bid_amount = request.form['bid_amount']
-            current_time = datetime.now()
-            print(bid_id)
-            print(bid_amount)
-            print(current_time)
-            print(buyer_id)
-            # Process bid amount here
-            return render_template('bid.html', item=item)
+            if 'item_number' in session:
+                item_number = session['item_number']
+            else:
+                print("No item number!")
+            
+            bid_amount = float(request.form['bid_amount'])
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Retrieve previous bid amount
+            cursor.execute("SELECT MAX(bid_amount) FROM bid WHERE item_number = :item_number", {'item_number': item_number})
+            previous_bid_amount = cursor.fetchone()[0]
+            
+            # Retrieve starting bid amount
+            cursor.execute("SELECT starting_bid FROM items WHERE item_number = :item_number", {'item_number': item_number})
+            start_bid = cursor.fetchone()[0]
+            
+            if bid_amount >= start_bid and (previous_bid_amount is None or bid_amount > previous_bid_amount):
+                bid_id = generate_bid_id()
+                cursor.execute("""
+                        INSERT INTO bid (bid_id, bid_amount, bid_timestamp, buyer_id, item_number) 
+                        VALUES (:bid_id, :bid_amount, :bid_timestamp, :buyer_id, :item_number)
+                    """, (bid_id, bid_amount, current_time, buyer_id, item_number))
+                connection.commit()
+                print("Inserted!")
+                return redirect(url_for('bid_display', item_number=item_number))
+            else:
+                print("Bid amount does not meet criteria.")
+                flash('Bid amount must be greater than or equal to starting bid and greater than the previous bid.', 'error')
+                return redirect(url_for('main_buyer'))
+            
         except Exception as e:
             # Handle any exceptions
             print("Error:", e)
             flash('An error occurred while processing your request.', 'error')
-            return render_template('main_buyer.html')
+            return redirect(url_for('main_buyer'))
 
 
 if __name__ == '__main__':
