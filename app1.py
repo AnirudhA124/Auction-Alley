@@ -7,28 +7,6 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Dummy user data for demonstration
-users = {'admin': 'admin'}
-
-# Define the products with scheduled time
-products = [
-    {"name": "Product 1", "description": "Description of product 1", "starting_bid": 50, "start_time": "2024-04-05T17:10:00", "end_time": "2024-04-05T17:11:00"},
-    {"name": "Product 2", "description": "Description of product 2", "starting_bid": 100, "start_time": "2024-04-07T22:30:00", "end_time": "2024-04-07T23:30:00"},
-    {"name": "Product 3", "description": "Description of product 3", "starting_bid": 75, "start_time": "2024-04-06T22:00:00", "end_time": "2024-04-06T23:00:00"},
-    {"name": "Product 4", "description": "Description of product 4", "starting_bid": 75, "start_time": "2024-04-06T22:00:00", "end_time": "2024-04-06T23:00:00"},
-]
-
-
-item = {
-        'title': 'Telephone',
-        'photo': './static/img2.jpg',
-        'description': 'This is a description of the example item.'
-    }
-
-# Filter out expired auctions
-current_time =datetime.now()
-upcoming_products = [product for product in products if datetime.fromisoformat(product["end_time"]) > current_time]
-
 # Database connection
 try:
     # Replace 'username', 'password', and 'host:port/service_name' with your actual Oracle connection details
