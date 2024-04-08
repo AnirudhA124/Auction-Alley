@@ -75,23 +75,22 @@ body {font-family: "Lato", sans-serif}
       Bid competitively, find hidden gems, and experience the convenience of buying and selling from anywhere, anytime. Join our vibrant community and ignite your auction passion at Auction Alley.</p>
   </div>
 
-  <!-- The Tour Section -->
-  <div class="w3-black" id="tour">
+   <!-- The Tour Section -->
+   <div class="w3-black" id="tour">
     <div class="w3-container w3-content w3-padding-64" style="max-width:800px; position: relative;">
       <h2 class="w3-wide w3-center">UPCOMING AUCTIONS</h2>
       <p class="w3-opacity w3-center"><i>Bid on the future: See what's coming soon to Auction Alley.</i></p><br>
       <div class="w3-row-padding w3-padding-32" style="margin:0 -16px; overflow: hidden;">
         <button class="w3-button w3-black w3-display-left" onclick="prev()">&#10094;</button>
         <div id="carousel" class="carousel">
-        {% for product in products %}
+        {% for item in items %}
           <div class="carousel-item">
             <img src="./static/img2.jpg" alt="New York" style="width:100%" class="w3-hover-opacity">
             <div class="w3-container w3-white">
-              <p><b>{{ product.name }}</b></p>
-              <p class="w3-opacity">Scheduled Time: {{ product.scheduled_time }}</p>
+              <p><b>{{ item[1] }}</b></p>
+              <p>Start Time: {{ item[4] }}</p>
               <div id="timer{{ loop.index }}"></div>
-              <p>Starting Bid: ${{ product.starting_bid }}</p>
-              <button class="w3-button w3-black w3-margin-bottom" onclick="document.getElementById('ticketModal').style.display='block'">Start Bidding</button>
+              <p>Starting Bid: ${{ item[3] }}</p>
             </div>
           </div>
         {% endfor %}
@@ -100,6 +99,7 @@ body {font-family: "Lato", sans-serif}
       </div>
     </div>
   </div>
+
   <!-- Ticket Modal -->
   <div id="ticketModal" class="w3-modal">
     <div class="w3-modal-content w3-animate-top w3-card-4">
@@ -194,28 +194,37 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
-{% for product in products %}
-            var countDownDate{{ loop.index }} = new Date("{{ product.scheduled_time }}").getTime();
 
-            var x{{ loop.index }} = setInterval(function() {
-                var now = new Date().getTime();
-                var distance = countDownDate{{ loop.index }} - now;
+// Timer script
+{% for item in items %}
+var start{{ loop.index }} = new Date("{{ item[4] }}").getTime();
+var end{{ loop.index }} = new Date("{{ item[5] }}").getTime();
+var now{{ loop.index }} = new Date().getTime();
 
-                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+if (now{{ loop.index }} >= start{{ loop.index }}) {
+  var distance{{ loop.index }} = end{{ loop.index }} - now{{ loop.index }};
+  var x{{ loop.index }} = setInterval(function() {
+    var days = Math.floor(distance{{ loop.index }} / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((distance{{ loop.index }} % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance{{ loop.index }} % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance{{ loop.index }} % (1000 * 60)) / 1000);
 
-                document.getElementById("timer{{ loop.index }}").innerHTML = days + "d " + hours + "h "
-                + minutes + "m " + seconds + "s ";
+    document.getElementById("timer{{ loop.index }}").innerHTML = days + "d " + hours + "h "
+    + minutes + "m " + seconds + "s ";
 
-                if (distance < 0) {
-                    clearInterval(x{{ loop.index }});
-                    document.getElementById("timer{{ loop.index }}").innerHTML = "EXPIRED";
-                }
-            }, 1000);
-        {% endfor %}
-  // Function to initialize carousel
+    if (distance{{ loop.index }} < 0) {
+      clearInterval(x{{ loop.index }});
+      document.getElementById("timer{{ loop.index }}").innerHTML = "EXPIRED";
+    }
+
+    distance{{ loop.index }} -= 1000;
+  }, 1000);
+} else {
+  document.getElementById("timer{{ loop.index }}").innerHTML = "Timer will start when the auction begins.";
+}
+{% endfor %}
+
+// Function to initialize carousel
 function initCarousel() {
   const carousel = document.getElementById('carousel');
   const items = document.querySelectorAll('.carousel-item');
