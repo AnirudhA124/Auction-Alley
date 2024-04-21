@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchased Item Details</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://img.freepik.com/free-photo/cylinder-empty-black-podium-pedestal-product-display-stand-background-3d-rendering_56104-1366.jpg?size=626&ext=jpg&ga=GA1.1.1700460183.1712188800&semt=ais'); 
+            background-size: cover;
+            background-position: center;
+            color: #000; /* Black text */
+        }
+        .container {
+            max-width: 800px; /* Expanded width */
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #000; /* Black border */
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow effect */
+        }
+        .details {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .value {
+            font-weight: normal;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .payment-options label {
+            display: inline-block;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+        input[type="text"] {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: calc(100% - 22px); /* Adjusted width for input fields */
+            padding: 10px;
+            border: 1px solid #000; /* Black border */
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #000; /* Black button background */
+            color: #fff; /* White text */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #333; /* Darker black on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Payment Portal</h2>
+        <div class="details">
+            <label>Item Purchased:</label>
+            <span class="value">{{ title }}</span> <!-- Replace {{ title }} with the dynamic value from your database -->
+        </div>
+        <div class="details">
+            <label>Final Bid Amount:</label>
+            <span class="value">{{ sale_amount }}</span> <!-- Replace {{ sale_amount }} with the dynamic value from your database -->
+        </div>
+        <div class="details">
+            <label>Auction ID:</label>
+            <span class="value">{{ auction_id }}</span> <!-- Replace {{ auction_id }} with the dynamic value from your database -->
+        </div>
+        <div class="details">
+            <label>Sold By:</label>
+            <span class="value">{{ seller }}</span> <!-- Replace {{ seller }} with the dynamic value from your database -->
+        </div>
+        <div class="form-group payment-options">
+            <label>Select Payment Mode:</label>
+            <input type="radio" id="creditCard" name="paymentMode" value="creditCard">
+            <label for="creditCard">Credit Card</label>
+            <input type="radio" id="debitCard" name="paymentMode" value="debitCard">
+            <label for="debitCard">Debit Card</label>
+            <input type="radio" id="upi" name="paymentMode" value="upi">
+            <label for="upi">UPI</label>
+        </div>
+        <div id="cardFields" class="form-group" style="display: none;">
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter card number" required>
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" name="cvv" placeholder="Enter CVV" required>
+            <label for="expiryDate">Expiry Date:</label>
+            <input type="text" id="expiryDate" name="expiryDate" placeholder="Enter expiry date" required>
+        </div>
+        <div id="upiFields" class="form-group" style="display: none;">
+            <label for="upiId">UPI ID:</label>
+            <input type="text" id="upiId" name="upiId" placeholder="Enter UPI ID" required>
+            <label for="bankName">Bank Name:</label>
+            <input type="text" id="bankName" name="bankName" placeholder="Enter bank name" required>
+        </div>
+        <form action="/payment_done" method="post">
+            <input type="submit" value="Proceed">
+        </form>
+    </div>
+
+    <script>
+        // JavaScript to show/hide card or UPI fields based on selected payment mode
+        document.querySelectorAll('input[type="radio"][name="paymentMode"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                var cardFields = document.getElementById('cardFields');
+                var upiFields = document.getElementById('upiFields');
+                if (this.value === 'creditCard' || this.value === 'debitCard') {
+                    cardFields.style.display = 'block';
+                    upiFields.style.display = 'none';
+                } else if (this.value === 'upi') {
+                    cardFields.style.display = 'none';
+                    upiFields.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

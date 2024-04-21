@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bids Won</title>
+  <style>
+    img {
+        width: 100px;
+        margin-right: 35px;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333; 
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .bid-history {
+      display: flex;
+      flex-direction: column; 
+      align-items: center; 
+      margin-top: 20px;
+    }
+
+    .bid-item {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 10px;
+      width: 440px; 
+      background-color: #fff; 
+    }
+
+    .bid-item h2 {
+      margin-top: 0;
+    }
+
+    .bid-item p {
+      margin: 5px 0;
+    }
+    .one{
+        display: flex;
+    }
+    .payment-btn {
+      align-self: center;
+      margin-top: 10px; /* Added margin-top to separate from content */
+      display: inline-block;
+      background-color: #333;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .payment-btn:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bids Won</h1>
+  </header>
+  
+  <section class="bid-history">
+    {% for item in items %}
+    <div class="bid-item">
+    <div class="one">
+        <div class="img">
+            <img src="{{ url_for('static', filename=item[1] + '.jpg') }}" alt="Item Image"> <!-- Image beneath the title -->
+        </div>
+        <div class="content">
+          <h2>Item Name: {{ item[0] }}</h2>
+          <p>Item Number: {{ item[1] }}</p>
+          <p>Bid Amount: ${{ item[2] }}</p>
+        </div>
+    </div>
+    <div class="two">
+        <a href="/payment?auction_id={{ auction_id }}" class="payment-btn">Proceed to Payment</a> <!-- Button to redirect to payment route -->
+    </div>
+    </div>
+    {% endfor %}
+  </section>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333; 
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .bid-history {
+      display: flex;
+      flex-direction: column; 
+      align-items: center; 
+      margin-top: 20px;
+    }
+
+    .bid-item {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 10px;
+      width: 440px; 
+      background-color: #fff; 
+    }
+
+    .bid-item h2 {
+      margin-top: 0;
+    }
+
+    .bid-item p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Purchase History</h1>
+  </header>
+  
+  <section class="bid-history">
+    {% for item in items %}
+    <div class="bid-item">
+      <h2>Item Name: {{ item[1] }}</h2>
+      <p>Item Number: {{ item[0] }}</p>
+      <p>Bid Amount: ${{ item[2] }}</p>
+    </div>
+    {% endfor %}
+    
+  </section>
+</body>
+</html>
