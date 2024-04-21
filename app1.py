@@ -26,6 +26,13 @@ def check_buyer_credentials(email, password):
     cursor.close()
     return count > 0
 
+def check_admin_credentials(email, password):
+    cursor = connection.cursor()
+    cursor.execute("SELECT COUNT(*) FROM admin WHERE email_id = :email_id AND password = :password", {'email_id': email, 'password': password})
+    count = cursor.fetchone()[0]
+    cursor.close()
+    return count > 0
+
 def check_seller_credentials(email, password):
     cursor = connection.cursor()
     cursor.execute("SELECT COUNT(*) FROM seller WHERE email = :email AND password = :password", {'email': email, 'password': password})
@@ -48,6 +55,11 @@ def login():
         buyer_id = cursor.fetchone()[0]
         session['buyer_id'] = buyer_id
         return redirect(url_for('main_buyer'))
+    elif check_admin_credentials(username,password):
+        cursor.execute("SELECT admin_id FROM admin WHERE email_id = :email_id", {'email_id': username})
+        admin_id = cursor.fetchone()[0]
+        session['admin_id'] = admin_id
+        return redirect(url_for('admin_dashboard'))
     else:
         # You might want to show an error message here
         print("Password/username incorrect!!")
@@ -653,6 +665,83 @@ def payment():
 @app.route('/payment_done',methods=['GET','POST'])
 def payment_done():
     return render_template('purchase_history.html')
+
+@app.route('/admin_dashboard',methods=['GET'])
+def admin_dashboard():
+    cursor = connection.cursor()
+
+    # Define the SQL query
+    sql_query = """
+        SELECT category_name, COUNT(category_id)
+        FROM category
+        GROUP BY category_name
+    """
+
+    # Execute the SQL query
+    cursor.execute(sql_query)
+
+    # Fetch all rows from the result set
+    rows = cursor.fetchall()
+    print(rows)
+    buyer_cnt_query="""select count(buyer_id) from buyer
+    """
+    cursor.execute(buyer_cnt_query)
+    buyer_count=cursor.fetchone()[0]
+    seller_cnt_query="""select count(buyer_id) from buyer
+    """
+    cursor.execute(seller_cnt_query)
+    seller_count=cursor.fetchone()[0]
+    return render_template('admin_dashboard.html',items=rows,buyer_count=buyer_count,seller_count=seller_count)
+
+@app.route('/delete_buyer_display',methods=['GET'])
+def delete_buyer_display():
+    return render_template('admin_deleteBuyer.html')
+
+@app.route('/delete_seller_display',methods=['GET'])
+def delete_seller_display():
+    return render_template('admin_deleteSeller.html')
+
+@app.route('/delete_buyer',methods=['GET','POST'])
+def delete_buyer():
+    if request.method=='POST':
+        buyer_id=request.form['buyer_id']
+        cursor = connection.cursor()
+
+        # Define the input parameters
+        p_buyer_id = buyer_id # Replace 'your_seller_id' with the seller ID you want to delete
+        p_result = cursor.var(cx_Oracle.STRING)
+
+        # Call the PL/SQL procedure
+        cursor.callproc("delete_buyer", [p_buyer_id, p_result])
+
+        # Print the result
+        print(p_result.getvalue())
+
+        # Commit the transaction
+        connection.commit()
+
+    return render_template('admin_dashboard.html')
+
+@app.route('/delete_seller',methods=['GET','POST'])
+def delete_seller():
+    if request.method=='POST':
+        seller_id=request.form['seller_id']
+        cursor = connection.cursor()
+
+        # Define the input parameters
+        p_seller_id = seller_id # Replace 'your_seller_id' with the seller ID you want to delete
+        p_result = cursor.var(cx_Oracle.STRING)
+
+        # Call the PL/SQL procedure
+        cursor.callproc("delete_seller", [p_seller_id, p_result])
+
+        # Print the result
+        print(p_result.getvalue())
+
+        # Commit the transaction
+        connection.commit()
+
+    return render_template('admin_dashboard.html')
 
 
 if __name__ == '__main__':
