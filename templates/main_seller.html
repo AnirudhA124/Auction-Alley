@@ -8,6 +8,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+img{
+  width: 241px;
+}
 body {font-family: "Lato", sans-serif}
 .mySlides {display: none}
 .carousel {
@@ -49,16 +52,17 @@ body {font-family: "Lato", sans-serif}
     <a href="#tour" class="w3-bar-item w3-button w3-padding-large w3-hide-small">AUCTIONS</a>
     <a href="#contact" class="w3-bar-item w3-button w3-padding-large w3-hide-small">CONTACT US</a>
     <a href="/item_display" class="w3-bar-item w3-button w3-padding-large">SELL</a>
+    <a href="/auction_history" class="w3-bar-item w3-button w3-padding-large">AUCTION HISTORY</a>
     <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
   </div>
 </div>
 
 <!-- Navbar on small screens (remove the onclick attribute if you want the navbar to always show on top of the content when clicking on the links) -->
 <div id="navDemo" class="w3-bar-block w3-black w3-hide w3-hide-large w3-hide-medium w3-top" style="margin-top:46px">
-  <a href="#band" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">BAND</a>
-  <a href="#tour" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">TOUR</a>
-  <a href="#contact" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">CONTACT</a>
-  <a href="#" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">MERCH</a>
+  <a href="#band" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">ABOUT US</a>
+  <a href="#tour" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">AUCTIONS</a>
+  <a href="#contact" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">CONTACT US</a>
+  <!-- <a href="#" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">MERCH</a> -->
 </div>
 
 <!-- Page content -->
@@ -85,7 +89,7 @@ body {font-family: "Lato", sans-serif}
         <div id="carousel" class="carousel">
         {% for item in items %}
           <div class="carousel-item">
-            <img src="./static/img2.jpg" alt="New York" style="width:100%" class="w3-hover-opacity">
+            <img src="{{ url_for('static', filename=item[0] + '.jpg') }}" alt="Item Image"> <!-- Image beneath the title -->
             <div class="w3-container w3-white">
               <p><b>{{ item[1] }}</b></p>
               <p>Start Time: {{ item[4] }}</p>
