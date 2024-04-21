@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2; /* Background color */
+      color: #333; /* Text color */
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .admin-dashboard {
+      display: flex;
+      flex-direction: column; /* Display items in a column */
+      align-items: center; /* Center items horizontally */
+      margin-top: 20px;
+    }
+
+    .admin-item {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 10px;
+      width: 440px; /* Increased width */
+      background-color: #fff; /* Background color for admin items */
+    }
+
+    .admin-item h2 {
+      margin-top: 0;
+    }
+
+    .admin-item p {
+      margin: 5px 0;
+    }
+
+    /* Styles for buttons */
+    .admin-item button {
+      background-color: black; /* Button background color */
+      color: white; /* Button text color */
+      border: none; /* Remove button border */
+      border-radius: 5px; /* Rounded corners */
+      padding: 10px 20px; /* Padding */
+      margin-top: 20px; /* Margin */
+      cursor: pointer; /* Cursor style */
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+  </header>
+  
+  <section class="admin-dashboard">
+    <div class="admin-item">
+      <h2>Number of Items Listed per Category</h2>
+      {% for item in items %}
+      <p> {{ item[0] }} : {{ item[1] }} </p>
+      {% endfor %}
+    </div>
+
+    <!-- <div class="admin-item">
+      <h2>Total Value of Sales in Each Category</h2>
+      
+      <p> Art and Collectibles : ₹{{count}} </p>
+      <p>Jewelry and Watches : ₹{{ count }}</p>
+      <p>Fashion and Accessories : ₹{{count }}</p>
+      <p>Home and Garden : ₹{{count}} </p>
+      <p>Electronics and Gadgets : ₹{{count}}</p>
+      <p>Vehicles and Automotive : ₹{{count}}</p>
+    </div> -->
+
+    <div class="admin-item">
+      <h2>Number of Buyers on the Website</h2>
+      
+      <p>Total Buyers: {{ buyer_count }}</p>
+    </div>
+
+    <div class="admin-item">
+      <h2>Number of Sellers on the Website</h2>
+      
+      <p>Total Sellers: {{ seller_count }}</p>
+    </div>
+    
+    <!-- Buttons for deleting buyers and sellers -->
+    <div class="admin-item">
+        <a href="/delete_buyer_display"><button>Delete Buyer</button></a>
+        <a href="/delete_seller_display"><button>Delete Seller</button></a>
+    </div>    
+  </section>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2; /* Background color */
+      color: #333; /* Text color */
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .admin-form {
+      display: flex;
+      flex-direction: column; /* Display items in a column */
+      align-items: center; /* Center items horizontally */
+      margin-top: 20px;
+    }
+
+    .admin-input {
+      margin-bottom: 10px;
+    }
+
+    .admin-input label {
+      display: block;
+      font-size: 18px; /* Larger font size */
+      font-weight: bold; /* Bold font */
+    }
+
+    .admin-input input[type="text"] {
+      width: 200px;
+      padding: 5px;
+    }
+
+    .admin-input input[type="submit"] {
+      padding: 8px 20px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Control</h1>
+  </header>
+  
+  <section class="admin-form">
+    <form action="/delete_buyer" method="post">
+      <div class="admin-input">
+        <label for="delete_buyer" style="font-size: 24px; font-weight: bold;">DELETE BUYER</label>
+		<br><br>
+        <label for="buyer_id">Enter Buyer ID:</label>
+        <input type="text" id="buyer_id" name="buyer_id" placeholder="Buyer ID" required>
+      </div>
+      <div class="admin-input">
+        <input type="submit" value="DELETE">
+      </div>
+    </form>
+  </section>
+</body>
+</html>
