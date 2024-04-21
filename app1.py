@@ -163,6 +163,23 @@ def generate_seller_id():
     seller_id = f"sel{unique_id:07d}"
     return seller_id
 
+def generate_payment_id():
+    if os.path.exists("payment.pkl"):
+        with open("payment.pkl", "rb") as f:
+            try:
+                counter = pickle.load(f)
+            except EOFError:
+                counter = 1
+    else:
+        counter = 1
+    unique_id = counter
+    counter += 1
+    with open("payment.pkl", "wb") as f:
+        pickle.dump(counter, f)
+    payment_id = f"pay{unique_id:07d}"
+    return payment_id
+
+
 def generate_buyer_id():
     if os.path.exists("buyer.pkl"):
         with open("buyer.pkl", "rb") as f:
@@ -318,10 +335,16 @@ def bid_display():
     item_row = cursor.fetchone()
     item = {
         'title': item_row[0],
-        'photo': './static/img2.jpg',
+        'photo': f'./static/{item_number}.jpg',
         'description': item_row[1]
     }
     cursor = connection.cursor()
+    cursor.execute("SELECT MAX(bid_amount) FROM bid WHERE item_number = :item_number", {'item_number': item_number})
+    max_bid_amount = cursor.fetchone()[0]
+    
+    # Update the auction table's final_amt field with the maximum bid amount
+    cursor.execute("UPDATE auction SET final_amt = :max_bid_amount WHERE item_number = :item_number", {'max_bid_amount': max_bid_amount, 'item_number': item_number})
+    connection.commit()  # Commit the transaction
     sql_query = """SELECT * FROM bid WHERE item_number = :item_number ORDER BY bid_timestamp DESC"""
     cursor.execute(sql_query, {'item_number': item_number})
     bids = [{'bidder_id': row[0], 'bid_amount': row[1], 'bid_time': row[2]} for row in cursor.fetchall()]
@@ -348,6 +371,9 @@ def items():
             category = request.form['category'].replace('&amp;', 'and')
             start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
             end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+            if 'image' in request.files:
+                image = request.files['image']
+                image.save(f'static/{item_number}.jpg')
             print(auction_id)
             print(seller_id)
             print(item_number)
@@ -362,6 +388,11 @@ def items():
                     INSERT INTO items (item_number, title, description, starting_bid, seller_id) 
                     VALUES (:item_number, :title, :description, :starting_bid, :seller_id)
                 """, (item_number,title,description,starting_bid,seller_id))
+            connection.commit()
+            cursor.execute("""
+                    INSERT INTO auction_seller (auction_id, seller_id) 
+                    VALUES (:auction_id, :seller_id)
+                """, (auction_id,seller_id))
             connection.commit()
             cursor.execute("""
                     INSERT INTO category (category_id, category_name, item_number) 
@@ -424,6 +455,204 @@ def bid():
             print("Error:", e)
             flash('An error occurred while processing your request.', 'error')
             return redirect(url_for('main_buyer'))
+
+@app.route('/auction_history', methods=['GET'])
+def auction_history():
+    try:
+        cursor = connection.cursor()
+        if 'seller_id' in session:
+            seller_id = session['seller_id']
+            print(seller_id)
+        else:
+            print("No seller!")
+            # Redirect if seller_id is not set in session
+            flash('Seller ID is not set.', 'error')
+            return redirect(url_for('main_seller'))
+        
+        if seller_id:
+            # Execute SQL query to fetch item information
+            cursor.execute("""
+        SELECT title, description, final_amt, start_time, end_time, items.item_number
+        FROM items
+        JOIN auction ON items.item_number = auction.item_number
+        WHERE auction.seller_id = :seller_id
+    """, {'seller_id': seller_id})
+
+            auction_items = cursor.fetchall()
+            print(auction_items)
+            cursor.close()
+            return render_template('auction_history.html', auction_items=auction_items)
+        else:
+            # Handle the case when seller_id is not set in the session
+            flash('Seller ID is not set.', 'error')
+            return redirect(url_for('main_seller'))
+    except cx_Oracle.DatabaseError as e:
+        # Handle Oracle database errors
+        print("Database error:", e)
+        flash('An error occurred while fetching data.', 'error')
+        return redirect(url_for('main_seller'))
+    except Exception as e:
+        # Handle other exceptions
+        print("Error:", e)
+        flash('An error occurred.', 'error')
+        return redirect(url_for('main_seller'))
+    
+@app.route('/bid_history', methods=['GET'])
+def bid_history():
+    result_set = cursor.var(cx_Oracle.CURSOR)
+    cursor.execute("BEGIN :result := get_bid_info(:buyer_id); END;",
+               result=result_set,
+               buyer_id='buy0000001')
+    rows = result_set.getvalue().fetchall()
+    print(rows)
+    return render_template('bid_history.html',bids=rows)
+
+@app.route('/purchase_history',methods=['GET'])
+def purchase_history():
+    if 'buyer_id' in session:
+        buyer_id = session['buyer_id']
+        try:
+            # Establish database connection
+            cursor = connection.cursor()
+
+            # Define the SQL query
+            sql_query = """
+            select item_number,title,final_amt from items natural join auction where auction_id in (select auction_id from auction_buyer where buyer_id= :buyer_id)
+            """
+
+            # Execute the SQL query with parameter
+            cursor.execute(sql_query, {'buyer_id': buyer_id})
+
+            # Fetch all rows from the result set
+            rows = cursor.fetchall()
+
+            # Close cursor and connection
+            cursor.close()
+            connection.close()
+
+            # Render the template with the data
+            return render_template('purchase_history.html', items=rows)
+
+        except cx_Oracle.Error as e:
+            error_message = f"Database error: {e}"
+            print(error_message)
+            return "Error"
+
+    else:
+        return "No buyer_id in session"
+
+@app.route('/bids_won',methods=['GET'])
+def bids_won():
+    if 'buyer_id' in session:
+                buyer_id = session['buyer_id']
+                print(buyer_id)
+    else:
+        print("No buyer!")
+    cursor = connection.cursor()
+
+    # Define the SQL query
+    sql_query = """
+        UPDATE bid b1
+        SET bid_status = 'success'
+        WHERE EXISTS (
+            SELECT 1
+            FROM auction a
+            WHERE a.end_time < CURRENT_TIMESTAMP
+        )
+        AND bid_amount = (
+            SELECT MAX(bid_amount)
+            FROM bid b2
+            WHERE b1.item_number = b2.item_number
+            GROUP BY b2.item_number
+            HAVING b1.item_number = b2.item_number
+        )
+    """
+
+    # Execute the SQL query
+    cursor.execute(sql_query)
+
+    # Commit the transaction
+    connection.commit()
+    sql_query = """
+        SELECT title, items.item_number, bid_amount
+        FROM items
+        JOIN bid ON items.item_number = bid.item_number
+        WHERE bid.bid_status = 'success'
+        AND bid.buyer_id = :buyer_id
+    """
+
+    # Commit the transaction
+    connection.commit()
+
+    # Execute the SQL query with the buyer_id input
+    cursor.execute(sql_query, {'buyer_id': buyer_id})
+
+    # Fetch all rows
+    rows = cursor.fetchall()
+    cnt=0
+    for i in rows:
+        cnt=cnt+1
+    item_number=rows[cnt-1][1]
+    print(item_number)
+    sql_query = """
+    SELECT auction_id 
+    FROM auction 
+    JOIN bid ON auction.item_number = bid.item_number 
+    WHERE bid_status ='success' 
+    AND bid.buyer_id=:buyer_id
+    AND auction.item_number=:item_number
+"""
+
+    # Execute the SQL query with the provided inputs
+    cursor.execute(sql_query, {'buyer_id': buyer_id, 'item_number': item_number})
+
+    # Fetch all the rows
+    auction_id = cursor.fetchall()[0][0]
+    print(auction_id)
+    print(rows)
+    return render_template('bids_won.html',items=rows,auction_id=auction_id)
+
+@app.route('/payment',methods=['GET'])
+def payment():
+    auction_id = request.args.get('auction_id')
+    print(auction_id)
+    # session['auction_id_payment']=auction_id
+    payment_id=generate_payment_id()
+    if 'buyer_id' in session:
+        buyer_id = session['buyer_id']
+        print(buyer_id)
+    else:
+        print("No buyer!")
+    # if 'auction_id_payment' in session:
+    #     auction_id = session['auction_id_payment']
+    #     print(auction_id)
+    # else:
+    #     print("No auction_id!")
+    cursor = connection.cursor()
+    sql_query = """
+        SELECT seller_id, final_amt
+        FROM auction
+        WHERE auction_id = :auction_id
+    """
+    cursor.execute(sql_query, {'auction_id': auction_id})
+    result = cursor.fetchone()
+    if result:
+        seller_id, final_amt = result
+    cursor.execute("""
+                INSERT INTO auction_buyer (auction_id, buyer_id) 
+                VALUES (:auction_id, :buyer_id)
+            """, (auction_id,buyer_id))
+    connection.commit()
+    cursor.execute("""
+                INSERT INTO payment (payment_id, final_amt,seller_id,buyer_id) 
+                VALUES (:payment_id, :final_amt, :seller_id, :buyer_id)
+            """, (payment_id,final_amt,seller_id,buyer_id))
+    connection.commit()
+    return render_template('payment.html')
+
+@app.route('/payment_done',methods=['GET','POST'])
+def payment_done():
+    return render_template('purchase_history.html')
 
 
 if __name__ == '__main__':
