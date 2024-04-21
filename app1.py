@@ -720,7 +720,7 @@ def delete_buyer():
         # Commit the transaction
         connection.commit()
 
-    return render_template('admin_dashboard.html')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/delete_seller',methods=['GET','POST'])
 def delete_seller():
@@ -741,7 +741,7 @@ def delete_seller():
         # Commit the transaction
         connection.commit()
 
-    return render_template('admin_dashboard.html')
+    return redirect(url_for('admin_dashboard'))
 
 
 if __name__ == '__main__':
