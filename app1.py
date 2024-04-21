@@ -280,7 +280,7 @@ def signup():
                     VALUES (:seller_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
                 """, (seller_id, email, password, fname, lname, address, pincode, phone_no))
                 connection.commit()
-                return redirect(url_for('main_seller'))
+                return redirect(url_for('index'))
 
             elif buyer:
                 buyer_id = generate_buyer_id()
@@ -289,7 +289,7 @@ def signup():
                     VALUES (:buyer_id, :email, :password, :fname, :lname, :address, :pincode, :phone_no)
                 """, (buyer_id, email, password, fname, lname, address, pincode, phone_no))
                 connection.commit()
-                return redirect(url_for('main_buyer'))
+                return redirect(url_for('index'))
 
         except Exception as e:
             # Handle any exceptions
@@ -569,7 +569,7 @@ def bids_won():
         WHERE EXISTS (
             SELECT 1
             FROM auction a
-            WHERE a.end_time < CURRENT_TIMESTAMP
+            WHERE a.end_time < CURRENT_TIMESTAMP And a.item_number=b1.item_number
         )
         AND bid_amount = (
             SELECT MAX(bid_amount)
@@ -590,7 +590,7 @@ def bids_won():
         FROM items
         JOIN bid ON items.item_number = bid.item_number
         WHERE bid.bid_status = 'success'
-        AND bid.buyer_id = :buyer_id
+        AND bid.buyer_id = :buyer_id 
     """
 
     # Commit the transaction
@@ -664,7 +664,7 @@ def payment():
 
 @app.route('/payment_done',methods=['GET','POST'])
 def payment_done():
-    return render_template('purchase_history.html')
+    return redirect(url_for('purchase_history'))
 
 @app.route('/admin_dashboard',methods=['GET'])
 def admin_dashboard():
@@ -687,7 +687,7 @@ def admin_dashboard():
     """
     cursor.execute(buyer_cnt_query)
     buyer_count=cursor.fetchone()[0]
-    seller_cnt_query="""select count(buyer_id) from buyer
+    seller_cnt_query="""select count(seller_id) from seller
     """
     cursor.execute(seller_cnt_query)
     seller_count=cursor.fetchone()[0]
